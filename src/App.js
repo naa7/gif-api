@@ -1,25 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import GifCard from './components/GIfCard';
+import SearchField from './components/SearchField';
+import { API_KEY } from './components/config';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      gifs: [] // State to hold the GIFs
+    };
+  }
+
+  // API call to fetch GIFs based on search term
+  fetchGifs = async (searchTerm) => {
+    const url = `http://api.giphy.com/v1/gifs/search?q=${searchTerm}&api_key=${API_KEY}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (Array.isArray(data.data)) {
+        this.setState({ gifs: data.data });
+      } else {
+        console.error('Invalid response:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching GIFs:', error);
+    }
+  };
+
+  render() {
+    return (
+      <div>
+        <SearchField onSearch={this.fetchGifs} />
+        {this.state.gifs.map((gif) => (
+          <GifCard key={gif.id} gif={gif} />
+        ))}
+      </div>
+    );
+  }
 }
 
 export default App;
